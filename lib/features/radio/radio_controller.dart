@@ -37,17 +37,27 @@ class RadioController extends ChangeNotifier {
     _connectivitySubscription = _connectivityService.onConnectionChanged.listen(
       _handleConnectionChanged,
     );
-    _playbackEventSubscription = _radioService.playbackEventStream.listen(
-      (event) {
+    _playerStateSubscription = _radioService.playerStateStream.listen(
+      (state) {
         if (_isDisposed) return;
-        if (_userWantsToPlay) {
-          if (event.processingState == ProcessingState.ready) {
+
+        final isPlaying = state.playing;
+        final processingState = state.processingState;
+
+        if (isPlaying) {
+          _userWantsToPlay = true;
+          if (processingState == ProcessingState.ready || processingState == ProcessingState.completed) {
             _retryAttempt = 0;
             _isReconnecting = false;
             _setStatus(RadioStatus.playing);
-          } else if (event.processingState == ProcessingState.buffering ||
-                     event.processingState == ProcessingState.loading) {
+          } else if (processingState == ProcessingState.buffering || processingState == ProcessingState.loading) {
             _setStatus(RadioStatus.loading);
+          }
+        } else {
+          _userWantsToPlay = false;
+          _isReconnecting = false;
+          if (_status == RadioStatus.playing || _status == RadioStatus.loading || _status == RadioStatus.reconnecting) {
+            _setStatus(RadioStatus.paused);
           }
         }
       },
@@ -66,7 +76,7 @@ class RadioController extends ChangeNotifier {
   final NowPlayingService _nowPlayingService;
 
   StreamSubscription<bool>? _connectivitySubscription;
-  StreamSubscription<PlaybackEvent>? _playbackEventSubscription;
+  StreamSubscription<PlayerState>? _playerStateSubscription;
   Timer? _retryTimer;
   Timer? _nowPlayingTimer;
 
@@ -343,7 +353,7 @@ class RadioController extends ChangeNotifier {
     _cancelRetryTimer();
     stopNowPlayingPolling();
     unawaited(_connectivitySubscription?.cancel());
-    unawaited(_playbackEventSubscription?.cancel());
+    unawaited(_playerStateSubscription?.cancel());
     unawaited(_connectivityService.dispose());
     _nowPlayingService.dispose();
     unawaited(_radioService.dispose());

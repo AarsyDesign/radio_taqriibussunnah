@@ -22,15 +22,19 @@ class AppLinkButton extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         foregroundColor: colorScheme.primary,
         side: BorderSide(color: colorScheme.secondary.withValues(alpha: 0.3)),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         textStyle: Theme.of(
           context,
-        ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+        ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: [Icon(icon, size: 18), const SizedBox(width: 8), Text(label)],
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: 8),
+          Flexible(child: Text(label)),
+        ],
       ),
     );
   }

@@ -26,8 +26,9 @@ class _RadioPageState extends State<RadioPage> {
         animation: controller,
         builder: (context, _) {
           return SafeArea(
+            bottom: false,
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+              padding: const EdgeInsets.fromLTRB(20, 58, 20, 24),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight:
@@ -35,120 +36,114 @@ class _RadioPageState extends State<RadioPage> {
                       MediaQuery.paddingOf(context).vertical -
                       56,
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(height: 12),
-                    const _LogoImage(),
-                    const SizedBox(height: 28),
-                    Text(
-                      controller.config.radioName,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium
-                          ?.copyWith(
-                            color: colorScheme.onSurface,
-                            fontWeight: FontWeight.w800,
-                            height: 1.15,
-                          ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      controller.config.radioSubtitle,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    _NowPlayingCard(
-                      title:
-                          controller.nowPlaying?.title ??
-                          controller.config.radioName,
-                      artist:
-                          controller.nowPlaying?.artist ??
-                          controller.config.radioSubtitle,
-                      isOnline: controller.nowPlaying?.isOnline ?? false,
-                      listeners: controller.nowPlaying?.listeners,
-                      isLoading: controller.isLoadingNowPlaying,
-                      onRefresh: controller.refreshNowPlaying,
-                    ),
-                    const SizedBox(height: 22),
-                    _PlayButton(
-                      showPause: controller.userWantsToPlay,
-                      isLoading: controller.isLoading,
-                      onPressed: controller.togglePlay,
-                    ),
-                    const SizedBox(height: 18),
-                    if (controller.canRetry) ...[
-                      _RetryStatusCard(
-                        title: controller.status == RadioStatus.offline
-                            ? AppConstants.noConnectionTitle
-                            : AppConstants.unavailableTitle,
-                        subtitle: controller.status == RadioStatus.offline
-                            ? AppConstants.noConnectionSubtitle
-                            : AppConstants.unavailableSubtitle,
-                        onRetry: controller.retry,
-                      ),
-                      const SizedBox(height: 14),
-                    ],
-                    _StatusPill(
-                      message: controller.statusMessage,
-                      showProgress: controller.isReconnecting,
-                    ),
-                    const SizedBox(height: 28),
-                    Wrap(
-                      alignment: WrapAlignment.center,
-                      spacing: 10,
-                      runSpacing: 10,
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 430),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        AppLinkButton(
-                          label: AppConstants.telegramLabel,
-                          icon: Icons.telegram,
-                          url: controller.config.telegramUrl,
-                        ),
-                        AppLinkButton(
-                          label: AppConstants.websiteLabel,
-                          icon: Icons.language_rounded,
-                          url: controller.config.websiteUrl,
-                        ),
-                        OutlinedButton.icon(
-                          onPressed: () => Share.share(
-                            'Dengarkan ${controller.config.radioName} di ${controller.config.websiteUrl}',
-                            subject: controller.config.radioName,
-                          ),
-                          icon: const Icon(Icons.share_rounded, size: 18),
-                          label: const Text(AppConstants.shareLabel),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: colorScheme.primary,
-                            side: BorderSide(
-                              color: colorScheme.secondary.withValues(
-                                alpha: 0.3,
+                        const _LogoImage(),
+                        const SizedBox(height: 22),
+                        Text(
+                          controller.config.radioName,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(
+                                color: colorScheme.onSurface,
+                                fontWeight: FontWeight.w900,
+                                height: 1.12,
                               ),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 18,
-                              vertical: 14,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            textStyle: Theme.of(context).textTheme.labelLarge
-                                ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          controller.config.radioSubtitle,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                                height: 1.35,
+                              ),
+                        ),
+                        const SizedBox(height: 18),
+                        _NowPlayingCard(
+                          title:
+                              controller.nowPlaying?.title ??
+                              controller.config.radioName,
+                          artist:
+                              controller.nowPlaying?.artist ??
+                              controller.config.radioSubtitle,
+                          isOnline: controller.nowPlaying?.isOnline ?? false,
+                          listeners: controller.nowPlaying?.listeners,
+                          playlist: controller.nowPlaying?.playlist,
+                          isLoading: controller.isLoadingNowPlaying,
+                          onRefresh: controller.refreshNowPlaying,
+                        ),
+                        const SizedBox(height: 22),
+                        _PlayButton(
+                          showPause: controller.userWantsToPlay,
+                          isLoading: controller.isLoading,
+                          onPressed: controller.togglePlay,
+                        ),
+                        const SizedBox(height: 18),
+                        if (controller.canRetry) ...[
+                          _RetryStatusCard(
+                            title: controller.status == RadioStatus.offline
+                                ? AppConstants.noConnectionTitle
+                                : AppConstants.unavailableTitle,
+                            subtitle: controller.status == RadioStatus.offline
+                                ? AppConstants.noConnectionSubtitle
+                                : AppConstants.unavailableSubtitle,
+                            onRetry: controller.retry,
                           ),
+                          const SizedBox(height: 14),
+                        ],
+                        _StatusPill(
+                          message: controller.statusMessage,
+                          showProgress: controller.isReconnecting,
+                        ),
+                        const SizedBox(height: 24),
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: [
+                            AppLinkButton(
+                              label: AppConstants.telegramLabel,
+                              icon: Icons.telegram,
+                              url: controller.config.telegramUrl,
+                            ),
+                            AppLinkButton(
+                              label: AppConstants.websiteLabel,
+                              icon: Icons.language_rounded,
+                              url: controller.config.websiteUrl,
+                            ),
+                            OutlinedButton.icon(
+                              onPressed: () => SharePlus.instance.share(
+                                ShareParams(
+                                  text:
+                                      'Dengarkan ${controller.config.radioName} di ${controller.config.websiteUrl}',
+                                  subject: controller.config.radioName,
+                                ),
+                              ),
+                              icon: const Icon(Icons.share_rounded, size: 18),
+                              label: const Text(AppConstants.shareLabel),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          AppConstants.footerText,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                letterSpacing: 0.2,
+                              ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 28),
-                    Text(
-                      AppConstants.footerText,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -175,12 +170,11 @@ class _RetryStatusCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      constraints: const BoxConstraints(maxWidth: 380),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
+        color: colorScheme.errorContainer.withValues(alpha: 0.28),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.5)),
+        border: Border.all(color: colorScheme.error.withValues(alpha: 0.22)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -234,6 +228,7 @@ class _NowPlayingCard extends StatelessWidget {
     required this.artist,
     required this.isOnline,
     required this.listeners,
+    required this.playlist,
     required this.isLoading,
     required this.onRefresh,
   });
@@ -242,6 +237,7 @@ class _NowPlayingCard extends StatelessWidget {
   final String artist;
   final bool isOnline;
   final int? listeners;
+  final String? playlist;
   final bool isLoading;
   final VoidCallback onRefresh;
 
@@ -250,23 +246,38 @@ class _NowPlayingCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      constraints: const BoxConstraints(maxWidth: 360),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.outline),
+        color: AppConstants.ivory,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: AppConstants.softGold.withValues(alpha: 0.28),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppConstants.deepGreen.withValues(alpha: 0.07),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Sedang diputar',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: colorScheme.secondary,
-                  fontWeight: FontWeight.w800,
+              Icon(
+                Icons.graphic_eq_rounded,
+                color: colorScheme.secondary,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Sedang diputar',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: colorScheme.secondary,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
               TextButton.icon(
@@ -283,14 +294,18 @@ class _NowPlayingCard extends StatelessWidget {
                     : const Icon(Icons.refresh_rounded, size: 16),
                 label: const Text('Refresh'),
                 style: TextButton.styleFrom(
-                  foregroundColor: colorScheme.secondary,
                   visualDensity: VisualDensity.compact,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
+          Divider(
+            color: AppConstants.softGold.withValues(alpha: 0.24),
+            height: 1,
+          ),
+          const SizedBox(height: 12),
           Text(
             title,
             textAlign: TextAlign.center,
@@ -298,7 +313,7 @@ class _NowPlayingCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: colorScheme.onSurface,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w900,
               height: 1.2,
             ),
           ),
@@ -311,7 +326,20 @@ class _NowPlayingCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+          if (playlist != null && playlist!.trim().isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Playlist: ${playlist!.trim()}',
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colorScheme.secondary,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ],
@@ -400,13 +428,13 @@ class _LogoImage extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      width: 128,
-      height: 128,
-      padding: const EdgeInsets.all(8),
+      width: 116,
+      height: 116,
+      padding: const EdgeInsets.all(9),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: colorScheme.primary,
-        border: Border.all(color: colorScheme.outline, width: 2),
+        color: AppConstants.ivory,
+        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.18)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.16),
@@ -418,9 +446,9 @@ class _LogoImage extends StatelessWidget {
       child: ClipOval(
         child: Image.asset(
           'assets/images/logo_radio.png',
-          fit: BoxFit.cover,
+          fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
-            return Icon(Icons.radio, color: colorScheme.onPrimary, size: 56);
+            return Icon(Icons.radio, color: colorScheme.primary, size: 52);
           },
         ),
       ),

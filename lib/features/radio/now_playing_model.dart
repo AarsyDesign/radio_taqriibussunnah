@@ -7,6 +7,7 @@ class NowPlayingModel {
     required this.text,
     required this.isOnline,
     required this.listeners,
+    this.playlist,
   });
 
   final String title;
@@ -14,6 +15,7 @@ class NowPlayingModel {
   final String text;
   final bool isOnline;
   final int? listeners;
+  final String? playlist;
 
   factory NowPlayingModel.fromJson(
     Map<String, dynamic> json, {
@@ -36,6 +38,7 @@ class NowPlayingModel {
       text: text,
       isOnline: _readOnlineStatus(json) ?? hasMetadata,
       listeners: _readListeners(json),
+      playlist: _readPlaylist(json),
     );
   }
 
@@ -92,5 +95,19 @@ class NowPlayingModel {
     }
 
     return null;
+  }
+
+  static String? _readPlaylist(Map<String, dynamic> json) {
+    final nowPlaying = json['now_playing'];
+    if (nowPlaying is! Map<String, dynamic>) {
+      return null;
+    }
+
+    final playlist = _readString(nowPlaying['playlist']);
+    if (playlist.isEmpty) {
+      return null;
+    }
+
+    return playlist;
   }
 }

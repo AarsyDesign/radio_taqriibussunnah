@@ -16,6 +16,8 @@ class RadioService {
   Stream<PlaybackEvent> get playbackEventStream =>
       _audioPlayer.playbackEventStream;
 
+  Stream<PlayerState> get playerStateStream => _audioPlayer.playerStateStream;
+
   Future<void> configureAudioSession() async {
     if (_isAudioSessionConfigured) {
       return;

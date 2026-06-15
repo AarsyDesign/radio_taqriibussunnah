@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../core/app_constants.dart';
 import '../../core/radio_config_provider.dart';
-import '../../theme_controller.dart';
+import '../../core/theme/theme_controller.dart';
 import '../about/about_page.dart';
 import '../radio/radio_controller.dart';
 import '../radio/radio_page.dart';
@@ -41,7 +42,7 @@ class _MainShellState extends State<MainShell> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           Column(
@@ -62,48 +63,46 @@ class _MainShellState extends State<MainShell> {
           Positioned(
             top: MediaQuery.paddingOf(context).top + 16,
             right: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surface.withValues(alpha: 0.7),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: Icon(
-                  widget.themeController.isDarkMode
-                      ? Icons.light_mode_rounded
-                      : Icons.dark_mode_rounded,
+            child: Material(
+              color: colorScheme.surface.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(999),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: colorScheme.outline.withValues(alpha: 0.24),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppConstants.deepGreen.withValues(alpha: 0.08),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
                 ),
-                color: colorScheme.primary,
-                onPressed: widget.themeController.toggleTheme,
-                tooltip: widget.themeController.isDarkMode
-                    ? 'Mode Terang'
-                    : 'Mode Gelap',
+                child: IconButton(
+                  icon: Icon(
+                    widget.themeController.isDarkMode
+                        ? Icons.light_mode_rounded
+                        : Icons.dark_mode_rounded,
+                  ),
+                  color: colorScheme.primary,
+                  onPressed: widget.themeController.toggleTheme,
+                  tooltip: widget.themeController.isDarkMode
+                      ? 'Mode Terang'
+                      : 'Mode Gelap',
+                ),
               ),
             ),
           ),
         ],
       ),
-      bottomNavigationBar: NavigationBarTheme(
-        data: NavigationBarThemeData(
-          backgroundColor: colorScheme.surface,
-          indicatorColor: colorScheme.surfaceContainerHighest,
-          labelTextStyle: WidgetStateProperty.resolveWith((states) {
-            final isSelected = states.contains(WidgetState.selected);
-            return Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: isSelected
-                  ? colorScheme.primary
-                  : colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w700,
-            );
-          }),
-          iconTheme: WidgetStateProperty.resolveWith((states) {
-            final isSelected = states.contains(WidgetState.selected);
-            return IconThemeData(
-              color: isSelected
-                  ? colorScheme.primary
-                  : colorScheme.onSurfaceVariant,
-            );
-          }),
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          border: Border(
+            top: BorderSide(color: colorScheme.outline.withValues(alpha: 0.18)),
+          ),
         ),
         child: NavigationBar(
           selectedIndex: _selectedIndex,

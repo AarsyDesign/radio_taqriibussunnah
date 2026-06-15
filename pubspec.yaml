@@ -99,13 +99,13 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: false
-  image_path: assets/images/logo_radio.jpg
+  image_path: assets/images/launcher_icon.jpg
   adaptive_icon_background: "#12372A"
   adaptive_icon_foreground: assets/images/logo_radio.jpg
 
 flutter_native_splash:
   color: "#F6EEDC"
-  image: assets/images/logo_radio.jpg
+  image: assets/images/splash_icon.png
   android: true
   ios: false
   web: false

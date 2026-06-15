@@ -2,185 +2,272 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_config.dart';
 import '../../core/app_constants.dart';
-import 'schedule_item.dart';
-import 'schedule_model.dart';
-import 'schedule_service.dart';
+import 'broadcast_schedule_data.dart';
+import 'broadcast_schedule_item.dart';
 
-class SchedulePage extends StatefulWidget {
+class SchedulePage extends StatelessWidget {
   const SchedulePage({super.key});
-
-  @override
-  State<SchedulePage> createState() => _SchedulePageState();
-}
-
-class _SchedulePageState extends State<SchedulePage> {
-  late final ScheduleService _scheduleService;
-  late Future<List<ScheduleModel>> _scheduleFuture;
-
-  Future<void> _refreshSchedule() async {
-    setState(() {
-      _scheduleFuture = _scheduleService.fetchSchedule();
-    });
-    await _scheduleFuture;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _scheduleService = ScheduleService();
-    _scheduleFuture = _scheduleService.fetchSchedule();
-  }
-
-  @override
-  void dispose() {
-    _scheduleService.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
     return ColoredBox(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 30, 24, 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                AppConstants.scheduleTitle,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                AppConfig.radioName,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 14),
-              Align(
-                alignment: Alignment.center,
-                child: TextButton.icon(
-                  onPressed: _refreshSchedule,
-                  icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: const Text('Segarkan Jadwal'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: colorScheme.primary,
-                    textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
+          padding: const EdgeInsets.fromLTRB(20, 58, 20, 28),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    AppConstants.scheduleTitle,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  Text(
+                    AppConfig.radioName,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const _ActiveBroadcastCard(),
+                  const SizedBox(height: 14),
+                  const _DaurohInfoCard(),
+                  const SizedBox(height: 22),
+                  const _BroadcastScheduleSection(),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Jadwal dapat berubah sewaktu-waktu mengikuti kondisi siaran dan pengaturan playlist.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 14),
-              RefreshIndicator(
-                onRefresh: _refreshSchedule,
-                color: colorScheme.primary,
-                backgroundColor: colorScheme.surface,
-                child: FutureBuilder<List<ScheduleModel>>(
-                  future: _scheduleFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: colorScheme.primary,
-                          ),
-                        ),
-                      );
-                    }
-
-                    final items = snapshot.data ?? <ScheduleModel>[];
-                    final hasLiveItem = items.any((item) => item.isLive);
-
-                    if (hasLiveItem) {
-                      final liveCount = items
-                          .where((item) => item.isLive)
-                          .length;
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: colorScheme.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(
-                                color: colorScheme.outline.withValues(
-                                  alpha: 0.4,
-                                ),
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              child: Text(
-                                '${AppConstants.scheduleLiveLabel} • $liveCount program',
-                                style: Theme.of(context).textTheme.labelMedium
-                                    ?.copyWith(
-                                      color: colorScheme.secondary,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Column(
-                            children: [
-                              for (final item in items) ...[
-                                ScheduleItemWidget(model: item),
-                                const SizedBox(height: 12),
-                              ],
-                            ],
-                          ),
-                        ],
-                      );
-                    }
-
-                    if (items.isEmpty) {
-                      return Text(
-                        'Tidak ada jadwal yang tersedia saat ini.',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      );
-                    }
-
-                    return Column(
-                      children: [
-                        for (final item in items) ...[
-                          ScheduleItemWidget(model: item),
-                          const SizedBox(height: 12),
-                        ],
-                      ],
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                AppConstants.scheduleNote,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ActiveBroadcastCard extends StatelessWidget {
+  const _ActiveBroadcastCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark
+        ? const Color(0xFF143529)
+        : AppConstants.ivory.withValues(alpha: 0.9);
+    final titleColor = isDark ? AppConstants.ivory : colorScheme.onSurface;
+    final subtitleColor = isDark
+        ? AppConstants.cream.withValues(alpha: 0.9)
+        : colorScheme.onSurfaceVariant;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: AppConstants.softGold.withValues(alpha: isDark ? 0.36 : 0.28),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: AppConstants.softGold.withValues(
+                  alpha: isDark ? 0.2 : 0.14,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.graphic_eq_rounded,
+                color: isDark ? AppConstants.softGold : colorScheme.primary,
+                size: 21,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Siaran aktif / AutoDJ',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: titleColor,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Siaran berjalan melalui stream utama Radio Taqriibussunnah.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: subtitleColor,
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DaurohInfoCard extends StatelessWidget {
+  const _DaurohInfoCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppConstants.warmCream.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: AppConstants.softGold.withValues(alpha: 0.38),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: AppConstants.ivory,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.event_note_rounded,
+                color: AppConstants.primaryGreen,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        'Info Dauroh / Event Khusus',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: AppConstants.primaryGreen,
+                              fontWeight: FontWeight.w900,
+                            ),
+                      ),
+                      const _InfoBadge(label: 'Pengumuman'),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Informasi kegiatan khusus akan ditampilkan di sini saat tersedia.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppConstants.textMuted,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoBadge extends StatelessWidget {
+  const _InfoBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppConstants.ivory.withValues(alpha: 0.75),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+        child: Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: AppConstants.primaryGreen,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BroadcastScheduleSection extends StatelessWidget {
+  const _BroadcastScheduleSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Susunan Siaran Harian',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: colorScheme.onSurface,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Urutan siaran dapat menyesuaikan pengaturan playlist di server.',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: 14),
+        for (final entry in broadcastScheduleItems.indexed) ...[
+          BroadcastScheduleItem(model: entry.$2, index: entry.$1),
+          if (entry.$1 != broadcastScheduleItems.length - 1)
+            const SizedBox(height: 12),
+        ],
+      ],
     );
   }
 }

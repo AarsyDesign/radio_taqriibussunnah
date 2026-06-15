@@ -89,4 +89,7 @@ class ScheduleItemWidget extends StatelessWidget {
             ],
           ],
         ),
-     
+      ),
+    );
+  }
+}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/app_constants.dart';
 import '../radio_controller.dart';
 
 class MiniPlayer extends StatelessWidget {
@@ -26,22 +27,29 @@ class MiniPlayer extends StatelessWidget {
           child: SafeArea(
             top: false,
             child: Container(
-              margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              margin: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
                 color: colorScheme.primary,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: colorScheme.onPrimary.withValues(alpha: 0.2),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppConstants.deepGreen.withValues(alpha: 0.18),
+                    blurRadius: 14,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
                   Container(
-                    width: 38,
-                    height: 38,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: colorScheme.secondary,
+                      color: colorScheme.onPrimary.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -82,7 +90,7 @@ class MiniPlayer extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 4),
                   IconButton(
                     onPressed: controller.stopPlayback,
                     tooltip: 'Tutup player',
@@ -95,9 +103,7 @@ class MiniPlayer extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   IconButton.filled(
-                    onPressed: controller.isLoading
-                        ? null
-                        : controller.togglePlay,
+                    onPressed: controller.togglePlay,
                     icon: Icon(
                       showPause
                           ? Icons.pause_rounded

@@ -29,19 +29,15 @@ class AppAboutDialog extends StatelessWidget {
       ),
       title: Row(
         children: [
-          Image.asset(
-            'assets/images/logo_radio.png',
-            width: 40,
-            height: 40,
-          ),
+          Image.asset('assets/images/logo_radio.jpg', width: 40, height: 40),
           const SizedBox(width: 12),
           const Text('Tentang Aplikasi'),
         ],
       ),
       titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: colorScheme.onSurface,
-            fontWeight: FontWeight.w700,
-          ),
+        color: colorScheme.onSurface,
+        fontWeight: FontWeight.w700,
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -50,24 +46,24 @@ class AppAboutDialog extends StatelessWidget {
             Text(
               AppConfig.appName,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w800,
-                  ),
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w800,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               'Versi ${packageInfo.version} (${packageInfo.buildNumber})',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
               AppConstants.aboutDescription,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                    height: 1.4,
-                  ),
+                color: colorScheme.onSurface,
+                height: 1.4,
+              ),
             ),
           ],
         ),

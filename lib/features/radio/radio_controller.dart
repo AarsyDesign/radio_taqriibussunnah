@@ -37,32 +37,42 @@ class RadioController extends ChangeNotifier {
     _connectivitySubscription = _connectivityService.onConnectionChanged.listen(
       _handleConnectionChanged,
     );
-    _playerStateSubscription = _radioService.playerStateStream.listen(
-      (state) {
-        if (_isDisposed) return;
+    _playerStateSubscription = _radioService.playerStateStream.listen((state) {
+      if (_isDisposed) return;
 
-        final isPlaying = state.playing;
-        final processingState = state.processingState;
+      final isPlaying = state.playing;
+      final processingState = state.processingState;
 
-        if (isPlaying) {
-          _userWantsToPlay = true;
-          if (processingState == ProcessingState.ready || processingState == ProcessingState.completed) {
-            _retryAttempt = 0;
-            _isReconnecting = false;
-            _setStatus(RadioStatus.playing);
-          } else if (processingState == ProcessingState.buffering || processingState == ProcessingState.loading) {
-            _setStatus(RadioStatus.loading);
-          }
-        } else {
-          _userWantsToPlay = false;
+      if (processingState == ProcessingState.idle) {
+        _userWantsToPlay = false;
+        _retryAttempt = 0;
+        _isReconnecting = false;
+        _cancelRetryTimer();
+        _setStatus(RadioStatus.idle);
+        return;
+      }
+
+      if (isPlaying) {
+        _userWantsToPlay = true;
+        if (processingState == ProcessingState.ready ||
+            processingState == ProcessingState.completed) {
+          _retryAttempt = 0;
           _isReconnecting = false;
-          if (_status == RadioStatus.playing || _status == RadioStatus.loading || _status == RadioStatus.reconnecting) {
-            _setStatus(RadioStatus.paused);
-          }
+          _setStatus(RadioStatus.playing);
+        } else if (processingState == ProcessingState.buffering ||
+            processingState == ProcessingState.loading) {
+          _setStatus(RadioStatus.loading);
         }
-      },
-      onError: (_) => _handleStreamError(),
-    );
+      } else {
+        _userWantsToPlay = false;
+        _isReconnecting = false;
+        if (_status == RadioStatus.playing ||
+            _status == RadioStatus.loading ||
+            _status == RadioStatus.reconnecting) {
+          _setStatus(RadioStatus.paused);
+        }
+      }
+    }, onError: (_) => _handleStreamError());
     unawaited(_checkInitialConnection());
     startNowPlayingPolling();
   }
@@ -181,7 +191,7 @@ class RadioController extends ChangeNotifier {
     _cancelRetryTimer();
 
     try {
-      await _radioService.pause();
+      await _radioService.stop();
       _setStatus(RadioStatus.idle);
     } catch (_) {
       _setStatus(RadioStatus.idle);
@@ -223,17 +233,21 @@ class RadioController extends ChangeNotifier {
 
     try {
       // Jangan await play() karena live stream akan memblokir hingga siaran putus.
-      unawaited(_radioService.play(
-        streamUrl: config.streamUrl,
-        radioName: config.radioName,
-        radioSubtitle: config.radioSubtitle,
-        reloadStream: isReconnect,
-      ).catchError((_) {
-        if (!_isDisposed) {
-          _isReconnecting = false;
-          _handleStreamError();
-        }
-      }));
+      unawaited(
+        _radioService
+            .play(
+              streamUrl: config.streamUrl,
+              radioName: config.radioName,
+              radioSubtitle: config.radioSubtitle,
+              reloadStream: isReconnect,
+            )
+            .catchError((_) {
+              if (!_isDisposed) {
+                _isReconnecting = false;
+                _handleStreamError();
+              }
+            }),
+      );
     } catch (_) {
       _isReconnecting = false;
       _handleStreamError();

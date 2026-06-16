@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class AppConstants {
   const AppConstants._();
 
+  static const appLogo = 'assets/images/app_icon.png';
   static const appSubtitle = 'Kajian Islam & Murottal';
   static const readyStatus = 'Siap diputar';
   static const connectingStatus = 'Menyambungkan siaran...';

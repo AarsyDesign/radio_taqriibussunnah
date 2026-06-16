@@ -252,7 +252,7 @@ class _LogoImage extends StatelessWidget {
       ),
       child: ClipOval(
         child: Image.asset(
-          'assets/images/logo_radio.jpg',
+          AppConstants.appLogo,
           fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
             return Icon(Icons.radio, color: colorScheme.primary, size: 50);

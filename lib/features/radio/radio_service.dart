@@ -66,6 +66,12 @@ class RadioService {
     await _audioPlayer.pause();
   }
 
+  Future<void> stop() async {
+    await _audioPlayer.stop();
+    _isStreamReady = false;
+    _currentStreamUrl = null;
+  }
+
   Future<void> dispose() async {
     await _audioPlayer.dispose();
   }

@@ -10,6 +10,7 @@ Future<void> main() async {
     androidNotificationChannelId: AppConfig.notificationChannelId,
     androidNotificationChannelName: AppConfig.notificationChannelName,
     androidNotificationOngoing: true,
+    androidNotificationIcon: 'mipmap/ic_launcher',
   );
 
   runApp(const RadioTaqriibussunnahApp());

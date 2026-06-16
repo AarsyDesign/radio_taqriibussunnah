@@ -52,7 +52,7 @@ class _MainShellState extends State<MainShell> {
                   index: _selectedIndex,
                   children: [
                     RadioPage(controller: _radioController),
-                    const SchedulePage(),
+                SchedulePage(controller: _radioController),
                     AboutPage(configProvider: _configProvider),
                   ],
                 ),

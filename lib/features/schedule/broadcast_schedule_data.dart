@@ -8,10 +8,16 @@ const List<BroadcastScheduleModel> broadcastScheduleItems = [
     category: 'Murottal',
   ),
   BroadcastScheduleModel(
-    title: 'Kajian Pagi',
-    time: '04.30-06.00',
+    title: 'Kajian Pagi / Faedah Pagi',
+    time: '04.30-05.00',
     description: 'Kajian dan faedah pembuka hari',
     category: 'Kajian',
+  ),
+  BroadcastScheduleModel(
+    title: 'Dzikir Pagi',
+    time: '05.00-06.00',
+    description: 'Dzikir pagi sesuai sunnah',
+    category: 'Dzikir',
   ),
   BroadcastScheduleModel(
     title: 'Kajian Aqidah',
@@ -30,6 +36,12 @@ const List<BroadcastScheduleModel> broadcastScheduleItems = [
     time: '15.30-17.00',
     description: 'Murottal dan bacaan pilihan',
     category: 'Murottal',
+  ),
+  BroadcastScheduleModel(
+    title: 'Dzikir Petang',
+    time: '17.00-18.00',
+    description: 'Dzikir petang sesuai sunnah',
+    category: 'Dzikir',
   ),
   BroadcastScheduleModel(
     title: 'Kajian Malam',

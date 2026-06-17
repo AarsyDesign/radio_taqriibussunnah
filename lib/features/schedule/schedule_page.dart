@@ -304,6 +304,8 @@ class _DaurohInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final details = [
       eventInfo.subtitle,
       eventInfo.speaker,
@@ -311,14 +313,23 @@ class _DaurohInfoCard extends StatelessWidget {
       eventInfo.timeText,
       eventInfo.location,
     ].where((item) => item.isNotEmpty).toList(growable: false);
+    final cardColor = isDark
+        ? const Color(0xFF173429)
+        : AppConstants.warmCream.withValues(alpha: 0.72);
+    final borderColor = AppConstants.softGold.withValues(
+      alpha: isDark ? 0.44 : 0.38,
+    );
+    final titleColor = isDark ? AppConstants.ivory : AppConstants.primaryGreen;
+    final detailColor = isDark ? AppConstants.cream : AppConstants.textMuted;
+    final descriptionColor = isDark
+        ? AppConstants.ivory.withValues(alpha: 0.94)
+        : AppConstants.textMuted;
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppConstants.warmCream.withValues(alpha: 0.72),
+        color: cardColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: AppConstants.softGold.withValues(alpha: 0.38),
-        ),
+        border: Border.all(color: borderColor),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -346,7 +357,7 @@ class _DaurohInfoCard extends StatelessWidget {
                             : 'Info Dauroh / Event Khusus',
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(
-                              color: AppConstants.primaryGreen,
+                              color: titleColor,
                               fontWeight: FontWeight.w900,
                               height: 1.2,
                             ),
@@ -359,7 +370,7 @@ class _DaurohInfoCard extends StatelessWidget {
                     Text(
                       detail,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppConstants.textMuted,
+                        color: detailColor,
                         fontWeight: FontWeight.w700,
                         height: 1.32,
                       ),
@@ -370,17 +381,27 @@ class _DaurohInfoCard extends StatelessWidget {
                     Text(
                       eventInfo.description,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppConstants.textMuted,
+                        color: descriptionColor,
+                        fontWeight: isDark ? FontWeight.w600 : null,
                         height: 1.35,
                       ),
                     ),
                   ],
                   if (eventInfo.buttonUrl != null) ...[
                     const SizedBox(height: 12),
-                    AppLinkButton(
-                      label: eventInfo.buttonText,
-                      icon: Icons.open_in_new_rounded,
-                      url: eventInfo.buttonUrl!,
+                    Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: colorScheme.copyWith(
+                          primary: isDark
+                              ? AppConstants.softGold
+                              : colorScheme.primary,
+                        ),
+                      ),
+                      child: AppLinkButton(
+                        label: eventInfo.buttonText,
+                        icon: Icons.open_in_new_rounded,
+                        url: eventInfo.buttonUrl!,
+                      ),
                     ),
                   ],
                 ],
@@ -467,17 +488,24 @@ class _InfoBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppConstants.ivory.withValues(alpha: 0.75),
+        color: isDark
+            ? AppConstants.softGold.withValues(alpha: 0.18)
+            : AppConstants.ivory.withValues(alpha: 0.75),
         borderRadius: BorderRadius.circular(999),
+        border: isDark
+            ? Border.all(color: AppConstants.softGold.withValues(alpha: 0.34))
+            : null,
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: AppConstants.primaryGreen,
+            color: isDark ? AppConstants.ivory : AppConstants.primaryGreen,
             fontWeight: FontWeight.w800,
           ),
         ),

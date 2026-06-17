@@ -163,6 +163,11 @@ class RemoteRadioConfig {
     }
 
     final uri = Uri.parse(url);
+    final normalizedDriveUrl = _normalizeGoogleDriveImageUrl(uri);
+    if (normalizedDriveUrl != null) {
+      return normalizedDriveUrl;
+    }
+
     final path = uri.path.toLowerCase();
     const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp'];
     if (imageExtensions.any(path.endsWith)) {
@@ -174,7 +179,28 @@ class RemoteRadioConfig {
       return url;
     }
 
-    return null;
+    return url;
+  }
+
+  static String? _normalizeGoogleDriveImageUrl(Uri uri) {
+    if (uri.host.toLowerCase() != 'drive.google.com') {
+      return null;
+    }
+
+    final idFromQuery = uri.queryParameters['id']?.trim();
+    final idFromPath = RegExp(
+      r'/file/d/([^/]+)',
+      caseSensitive: false,
+    ).firstMatch(uri.path)?.group(1);
+    final fileId = (idFromPath?.isNotEmpty ?? false) ? idFromPath : idFromQuery;
+    if (fileId == null || fileId.isEmpty) {
+      return null;
+    }
+
+    return Uri.https('drive.google.com', '/thumbnail', {
+      'id': fileId,
+      'sz': 'w1200',
+    }).toString();
   }
 }
 

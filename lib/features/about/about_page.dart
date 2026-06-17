@@ -198,6 +198,15 @@ class _InfoCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
+          Text(
+            'Aplikasi ini dikembangkan oleh Ma\'had Taqriibussunnah sebagai media resmi untuk mendengarkan kajian Islam, murottal, dan siaran live.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+              height: 1.42,
+            ),
+          ),
+          const SizedBox(height: 14),
           for (final item in highlights) ...[
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -29,7 +29,14 @@ class AppAboutDialog extends StatelessWidget {
       ),
       title: Row(
         children: [
-          Image.asset('assets/images/logo_radio.jpg', width: 40, height: 40),
+          Image.asset(
+            AppConstants.appLogo,
+            width: 40,
+            height: 40,
+            errorBuilder: (context, error, stackTrace) {
+              return Icon(Icons.radio, color: colorScheme.primary, size: 40);
+            },
+          ),
           const SizedBox(width: 12),
           const Text('Tentang Aplikasi'),
         ],

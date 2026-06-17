@@ -6,12 +6,16 @@ import 'core/app_config.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await JustAudioBackground.init(
-    androidNotificationChannelId: AppConfig.notificationChannelId,
-    androidNotificationChannelName: AppConfig.notificationChannelName,
-    androidNotificationOngoing: true,
-    androidNotificationIcon: 'mipmap/ic_launcher',
-  );
+  try {
+    await JustAudioBackground.init(
+      androidNotificationChannelId: AppConfig.notificationChannelId,
+      androidNotificationChannelName: AppConfig.notificationChannelName,
+      androidNotificationOngoing: true,
+      androidNotificationIcon: 'mipmap/ic_launcher',
+    );
+  } catch (error) {
+    debugPrint('Background audio init skipped: $error');
+  }
 
   runApp(const RadioTaqriibussunnahApp());
 }

@@ -11,10 +11,13 @@ class RadioConfigProvider extends ChangeNotifier {
 
   RemoteRadioConfig _config = RemoteRadioConfig.fallback();
   bool _isLoading = false;
+  bool _hasRemoteConfigError = false;
   bool _isDisposed = false;
 
   RemoteRadioConfig get config => _config;
   bool get isLoading => _isLoading;
+  bool get isLoadingRemoteConfig => _isLoading;
+  bool get hasRemoteConfigError => _hasRemoteConfigError;
   bool get usingFallback => _config.isFallback;
   RemoteEventInfo? get eventInfo => _config.eventInfo;
   RemoteLiveInfo? get liveInfo => _config.liveInfo;
@@ -26,14 +29,26 @@ class RadioConfigProvider extends ChangeNotifier {
     if (_isLoading) return;
 
     _isLoading = true;
+    _hasRemoteConfigError = false;
     notifyListeners();
 
-    final newConfig = await _service.fetchConfig();
-    if (_isDisposed) return;
+    try {
+      final newConfig = await _service.fetchConfig();
+      if (_isDisposed) return;
 
-    _config = newConfig ?? RemoteRadioConfig.fallback();
-    _isLoading = false;
-    notifyListeners();
+      _config = newConfig ?? RemoteRadioConfig.fallback();
+      _hasRemoteConfigError = newConfig == null;
+    } catch (_) {
+      if (_isDisposed) return;
+
+      _config = RemoteRadioConfig.fallback();
+      _hasRemoteConfigError = true;
+    } finally {
+      if (!_isDisposed) {
+        _isLoading = false;
+        notifyListeners();
+      }
+    }
   }
 
   Future<void> refresh() => load();

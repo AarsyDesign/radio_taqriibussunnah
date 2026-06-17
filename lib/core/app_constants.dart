@@ -27,7 +27,7 @@ class AppConstants {
   static const scheduleLiveLabel = 'Sedang Live';
   static const scheduleNote = 'Jadwal dapat berubah sewaktu-waktu.';
   static const aboutDescription =
-      'Radio online yang menyiarkan kajian Islam, murottal, dan faedah ilmiah dari Ma’had Taqriibussunnah Pontianak.';
+      'Radio online yang menyiarkan kajian Islam, murottal, dan faedah ilmiah dari Ma\'had Taqriibussunnah Pontianak.';
   static const aboutNote =
       'Jika siaran belum tersedia, silakan coba beberapa saat lagi.';
 

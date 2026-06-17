@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'app_config.dart';
@@ -19,6 +20,7 @@ class RemoteConfigService {
     try {
       final uri = Uri.tryParse(AppConfig.remoteConfigUrl);
       if (uri == null || !uri.hasScheme || uri.host.isEmpty) {
+        debugPrint('Remote config skipped: invalid URL');
         return null;
       }
 
@@ -27,6 +29,7 @@ class RemoteConfigService {
           .timeout(const Duration(seconds: 8));
 
       if (response.statusCode != 200) {
+        debugPrint('Remote config skipped: HTTP ${response.statusCode}');
         return null;
       }
 
@@ -34,7 +37,10 @@ class RemoteConfigService {
       if (decoded is Map<String, dynamic>) {
         return RemoteRadioConfig.fromJson(decoded);
       }
-    } catch (_) {}
+      debugPrint('Remote config skipped: JSON root is not an object');
+    } catch (error) {
+      debugPrint('Remote config skipped: $error');
+    }
 
     return null;
   }

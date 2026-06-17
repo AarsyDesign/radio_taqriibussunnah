@@ -155,6 +155,27 @@ class RemoteRadioConfig {
 
     return str;
   }
+
+  static String? _readImageUrl(Object? value) {
+    final url = _readUrl(value);
+    if (url == null) {
+      return null;
+    }
+
+    final uri = Uri.parse(url);
+    final path = uri.path.toLowerCase();
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp'];
+    if (imageExtensions.any(path.endsWith)) {
+      return url;
+    }
+
+    final query = uri.query.toLowerCase();
+    if (query.contains('format=') || query.contains('image=')) {
+      return url;
+    }
+
+    return null;
+  }
 }
 
 class RemoteEventInfo {
@@ -194,7 +215,7 @@ class RemoteEventInfo {
       timeText: RemoteRadioConfig._readString(json['timeText']),
       location: RemoteRadioConfig._readString(json['location']),
       description: RemoteRadioConfig._readString(json['description']),
-      imageUrl: RemoteRadioConfig._readUrl(json['imageUrl']),
+      imageUrl: RemoteRadioConfig._readImageUrl(json['imageUrl']),
       buttonText: RemoteRadioConfig._readString(
         json['buttonText'],
         fallback: 'Buka Info',
@@ -250,7 +271,7 @@ class RemoteLiveInfo {
       topic: RemoteRadioConfig._readString(json['topic']),
       timeText: RemoteRadioConfig._readString(json['timeText']),
       description: RemoteRadioConfig._readString(json['description']),
-      imageUrl: RemoteRadioConfig._readUrl(json['imageUrl']),
+      imageUrl: RemoteRadioConfig._readImageUrl(json['imageUrl']),
       showRedLiveIndicator: RemoteRadioConfig._readBool(
         json['showRedLiveIndicator'],
       ),

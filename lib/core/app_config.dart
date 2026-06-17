@@ -13,7 +13,7 @@ class AppConfig {
       'http://151.245.85.182/api/nowplaying_static/radio.json';
   static const String scheduleUrl = 'ISI_SCHEDULE_URL_DI_SINI';
   static const String remoteConfigUrl =
-      'ISI_URL_PUBLIC_CONFIG_WEB_ADMIN_DI_SINI';
+      'https://radio-taqriibussunnah-admin-ka7r.vercel.app/api/public-config';
 
   static const String telegramUrl = 'https://t.me/taqriibussunnahptk';
   static const String websiteUrl = 'https://daurohpontianak2026.vercel.app';

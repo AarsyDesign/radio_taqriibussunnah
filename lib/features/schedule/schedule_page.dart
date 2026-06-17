@@ -2,198 +2,235 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_config.dart';
 import '../../core/app_constants.dart';
+import '../../core/radio_config_provider.dart';
+import '../../core/remote_radio_config.dart';
+import '../../widgets/app_link_button.dart';
 import '../radio/radio_controller.dart';
 import 'broadcast_schedule_data.dart';
 import 'broadcast_schedule_item.dart';
+import 'broadcast_schedule_model.dart';
 
 class SchedulePage extends StatelessWidget {
-  const SchedulePage({required this.controller, super.key});
+  const SchedulePage({
+    required this.controller,
+    required this.configProvider,
+    super.key,
+  });
 
   final RadioController controller;
+  final RadioConfigProvider configProvider;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    return AnimatedBuilder(
+      animation: Listenable.merge([controller, configProvider]),
+      builder: (context, _) {
+        final colorScheme = Theme.of(context).colorScheme;
+        final eventInfo = configProvider.eventInfo;
+        final liveInfo = configProvider.liveInfo;
+        final azuraCastLive = controller.nowPlaying?.isLive ?? false;
+        final showLiveCard = azuraCastLive || liveInfo != null;
+        final scheduleItems = configProvider.hasRemoteSchedule
+            ? configProvider.remoteScheduleItems
+                  .map(BroadcastScheduleModel.fromRemote)
+                  .toList(growable: false)
+            : broadcastScheduleItems;
 
-    return ColoredBox(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 58, 20, 28),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 560),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    AppConstants.scheduleTitle,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w900,
-                    ),
+        return ColoredBox(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 58, 20, 28),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 560),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        AppConstants.scheduleTitle,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(
+                              color: colorScheme.onSurface,
+                              fontWeight: FontWeight.w900,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        AppConfig.radioName,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      if (showLiveCard) ...[
+                        _ActiveBroadcastCard(
+                          controller: controller,
+                          liveInfo: liveInfo,
+                          azuraCastLive: azuraCastLive,
+                        ),
+                        const SizedBox(height: 14),
+                      ],
+                      if (eventInfo != null) ...[
+                        _DaurohInfoCard(eventInfo: eventInfo),
+                        const SizedBox(height: 22),
+                      ],
+                      _BroadcastScheduleSection(items: scheduleItems),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Jadwal dapat berubah sewaktu-waktu mengikuti kondisi siaran dan pengaturan playlist.',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    AppConfig.radioName,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                _ActiveBroadcastCard(controller: controller),
-                  const SizedBox(height: 14),
-                  const _DaurohInfoCard(),
-                  const SizedBox(height: 22),
-                  const _BroadcastScheduleSection(),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Jadwal dapat berubah sewaktu-waktu mengikuti kondisi siaran dan pengaturan playlist.',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                      height: 1.35,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
 class _ActiveBroadcastCard extends StatelessWidget {
-  const _ActiveBroadcastCard({required this.controller});
+  const _ActiveBroadcastCard({
+    required this.controller,
+    required this.liveInfo,
+    required this.azuraCastLive,
+  });
 
   final RadioController controller;
+  final RemoteLiveInfo? liveInfo;
+  final bool azuraCastLive;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final showPulse =
+        azuraCastLive || (liveInfo?.showRedLiveIndicator ?? false);
+    final nowPlayingTitle = controller.nowPlaying?.title ?? '';
+    final nowPlayingText = controller.nowPlaying?.text ?? '';
+    final nowPlayingPlaylist = controller.nowPlaying?.playlist ?? '';
+    final fallbackTitle = nowPlayingTitle.isNotEmpty
+        ? nowPlayingTitle
+        : nowPlayingText;
+    final title = _firstFilled([
+      liveInfo?.title,
+      'Kajian Live Sedang Berlangsung',
+    ]);
+    final topic = _firstFilled([liveInfo?.topic, fallbackTitle]);
+    final speaker = _firstFilled([liveInfo?.speaker]);
+    final timeText = _firstFilled([liveInfo?.timeText]);
+    final description = _firstFilled([
+      liveInfo?.description,
+      nowPlayingPlaylist.isNotEmpty ? 'Playlist: $nowPlayingPlaylist' : null,
+      'Siaran langsung dari stream utama Radio Taqriibussunnah.',
+    ]);
+    final cardColor = colorScheme.errorContainer.withValues(
+      alpha: isDark ? 0.24 : 0.78,
+    );
+    final bodyColor = isDark
+        ? AppConstants.cream.withValues(alpha: 0.9)
+        : colorScheme.onSurfaceVariant;
 
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, _) {
-        final isLive = controller.nowPlaying?.isLive ?? false;
-        
-        final cardColor = isLive
-            ? colorScheme.errorContainer.withValues(alpha: isDark ? 0.25 : 0.8)
-            : (isDark ? const Color(0xFF143529) : AppConstants.ivory.withValues(alpha: 0.9));
-        
-        final borderColor = isLive
-            ? colorScheme.error.withValues(alpha: 0.5)
-            : AppConstants.softGold.withValues(alpha: isDark ? 0.36 : 0.28);
-            
-        final titleColor = isLive
-            ? colorScheme.error
-            : (isDark ? AppConstants.ivory : colorScheme.onSurface);
-            
-        final subtitleColor = isDark
-            ? AppConstants.cream.withValues(alpha: 0.9)
-            : colorScheme.onSurfaceVariant;
-
-        final nowPlayingTitle = controller.nowPlaying?.title;
-        final nowPlayingText = controller.nowPlaying?.text;
-        final titleData = (nowPlayingTitle != null && nowPlayingTitle.isNotEmpty)
-            ? nowPlayingTitle
-            : (nowPlayingText != null && nowPlayingText.isNotEmpty ? nowPlayingText : '');
-        
-        final playlist = controller.nowPlaying?.playlist;
-
-        return DecoratedBox(
-          decoration: BoxDecoration(
-            color: cardColor,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: borderColor),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: isLive
-                        ? colorScheme.error.withValues(alpha: 0.15)
-                        : AppConstants.softGold.withValues(alpha: isDark ? 0.2 : 0.14),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    isLive ? Icons.sensors_rounded : Icons.graphic_eq_rounded,
-                    color: isLive ? colorScheme.error : (isDark ? AppConstants.softGold : colorScheme.primary),
-                    size: 21,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: colorScheme.error.withValues(alpha: 0.42)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _RemoteImageBox(
+              imageUrl: liveInfo?.imageUrl,
+              icon: Icons.sensors_rounded,
+              size: 58,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              isLive ? 'Kajian Live Sedang Berlangsung' : 'Siaran aktif / AutoDJ',
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: titleColor,
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: colorScheme.error,
                                 fontWeight: FontWeight.w900,
+                                height: 1.2,
                               ),
-                            ),
-                          ),
-                          if (isLive) ...[
-                            const SizedBox(width: 8),
-                            const _LivePulseIndicator(),
-                          ],
-                        ],
+                        ),
                       ),
-                      const SizedBox(height: 4),
-                      if (isLive && titleData.isNotEmpty) ...[
-                        Text(
-                          titleData,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: subtitleColor,
-                            fontWeight: FontWeight.w700,
-                            height: 1.4,
-                          ),
-                        ),
-                        if (playlist != null && playlist.isNotEmpty) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            'Playlist: $playlist',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: subtitleColor.withValues(alpha: 0.8),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ] else ...[
-                        Text(
-                          'Siaran berjalan melalui stream utama Radio Taqriibussunnah.',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: subtitleColor,
-                            fontWeight: FontWeight.w600,
-                            height: 1.4,
-                          ),
-                        ),
+                      if (showPulse) ...[
+                        const SizedBox(width: 8),
+                        const _LivePulseIndicator(),
                       ],
                     ],
                   ),
-                ),
-              ],
+                  if (topic.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      topic,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: bodyColor,
+                        fontWeight: FontWeight.w800,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                  if (speaker.isNotEmpty || timeText.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      [
+                        speaker,
+                        timeText,
+                      ].where((item) => item.isNotEmpty).join(' - '),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: bodyColor,
+                        fontWeight: FontWeight.w700,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 5),
+                  Text(
+                    description,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: bodyColor,
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                    ),
+                  ),
+                  if (liveInfo?.buttonUrl != null) ...[
+                    const SizedBox(height: 12),
+                    AppLinkButton(
+                      label: liveInfo!.buttonText,
+                      icon: Icons.open_in_new_rounded,
+                      url: liveInfo!.buttonUrl!,
+                    ),
+                  ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 }
@@ -261,10 +298,20 @@ class _LivePulseIndicatorState extends State<_LivePulseIndicator>
 }
 
 class _DaurohInfoCard extends StatelessWidget {
-  const _DaurohInfoCard();
+  const _DaurohInfoCard({required this.eventInfo});
+
+  final RemoteEventInfo eventInfo;
 
   @override
   Widget build(BuildContext context) {
+    final details = [
+      eventInfo.subtitle,
+      eventInfo.speaker,
+      eventInfo.dateText,
+      eventInfo.timeText,
+      eventInfo.location,
+    ].where((item) => item.isNotEmpty).toList(growable: false);
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: AppConstants.warmCream.withValues(alpha: 0.72),
@@ -278,17 +325,10 @@ class _DaurohInfoCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: AppConstants.ivory,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.event_note_rounded,
-                color: AppConstants.primaryGreen,
-              ),
+            _RemoteImageBox(
+              imageUrl: eventInfo.imageUrl,
+              icon: Icons.event_note_rounded,
+              size: 64,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -301,28 +341,119 @@ class _DaurohInfoCard extends StatelessWidget {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        'Info Dauroh / Event Khusus',
+                        eventInfo.title.isNotEmpty
+                            ? eventInfo.title
+                            : 'Info Dauroh / Event Khusus',
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(
                               color: AppConstants.primaryGreen,
                               fontWeight: FontWeight.w900,
+                              height: 1.2,
                             ),
                       ),
                       const _InfoBadge(label: 'Pengumuman'),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Informasi kegiatan khusus akan ditampilkan di sini saat tersedia.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppConstants.textMuted,
-                      height: 1.35,
+                  for (final detail in details) ...[
+                    const SizedBox(height: 5),
+                    Text(
+                      detail,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppConstants.textMuted,
+                        fontWeight: FontWeight.w700,
+                        height: 1.32,
+                      ),
                     ),
-                  ),
+                  ],
+                  if (eventInfo.description.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      eventInfo.description,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppConstants.textMuted,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                  if (eventInfo.buttonUrl != null) ...[
+                    const SizedBox(height: 12),
+                    AppLinkButton(
+                      label: eventInfo.buttonText,
+                      icon: Icons.open_in_new_rounded,
+                      url: eventInfo.buttonUrl!,
+                    ),
+                  ],
                 ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RemoteImageBox extends StatelessWidget {
+  const _RemoteImageBox({
+    required this.imageUrl,
+    required this.icon,
+    required this.size,
+  });
+
+  final String? imageUrl;
+  final IconData icon;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final fallback = _ImageFallback(icon: icon);
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: imageUrl == null
+            ? fallback
+            : Image.network(
+                imageUrl!,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  }
+
+                  return fallback;
+                },
+                errorBuilder: (context, error, stackTrace) => fallback,
+              ),
+      ),
+    );
+  }
+}
+
+class _ImageFallback extends StatelessWidget {
+  const _ImageFallback({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppConstants.ivory.withValues(alpha: 0.86),
+        border: Border.all(
+          color: AppConstants.softGold.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Image.asset(
+          AppConstants.appLogo,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return Icon(icon, color: AppConstants.primaryGreen);
+          },
         ),
       ),
     );
@@ -356,7 +487,9 @@ class _InfoBadge extends StatelessWidget {
 }
 
 class _BroadcastScheduleSection extends StatelessWidget {
-  const _BroadcastScheduleSection();
+  const _BroadcastScheduleSection({required this.items});
+
+  final List<BroadcastScheduleModel> items;
 
   @override
   Widget build(BuildContext context) {
@@ -382,12 +515,22 @@ class _BroadcastScheduleSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-        for (final entry in broadcastScheduleItems.indexed) ...[
+        for (final entry in items.indexed) ...[
           BroadcastScheduleItem(model: entry.$2, index: entry.$1),
-          if (entry.$1 != broadcastScheduleItems.length - 1)
-            const SizedBox(height: 12),
+          if (entry.$1 != items.length - 1) const SizedBox(height: 12),
         ],
       ],
     );
   }
+}
+
+String _firstFilled(List<String?> values) {
+  for (final value in values) {
+    final trimmed = value?.trim() ?? '';
+    if (trimmed.isNotEmpty) {
+      return trimmed;
+    }
+  }
+
+  return '';
 }

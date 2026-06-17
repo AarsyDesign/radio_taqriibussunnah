@@ -99,14 +99,16 @@ class BroadcastScheduleItem extends StatelessWidget {
                       height: 1.2,
                     ),
                   ),
-                  const SizedBox(height: 5),
-                  Text(
-                    model.description,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: bodyColor,
-                      height: 1.35,
+                  if (model.description.isNotEmpty) ...[
+                    const SizedBox(height: 5),
+                    Text(
+                      model.description,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: bodyColor,
+                        height: 1.35,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
